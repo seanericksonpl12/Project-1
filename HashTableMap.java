@@ -92,6 +92,9 @@ public class HashTableMap<KeyType, ValueType> implements MapADT<KeyType, ValueTy
     return searchedValue;
   }
 
+  public void increaseSize() {
+	  this.size++;
+  }
   @Override
   public int size() {
     int counter = 0;
