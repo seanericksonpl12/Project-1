@@ -3,6 +3,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.io.Reader;
 import java.util.Collections;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 
 // --== CS400 File Header Information ==--
 // Author: CS400 Course Staff
@@ -26,8 +28,18 @@ public class Backend implements BackendInterface {
 	 * 
 	 * @param args list of command line arguments passed to front end
 	 */
-	public Backend(String[] args) {
+	public Backend(String[] args) throws FileNotFoundException{
+		String arg = args[0];
+		
+		genres = new ArrayList<String>();
+		ratings = new ArrayList<String>();
+		
 		MovieDataReader movieReader = new MovieDataReader();
+		FileReader file = new FileReader(arg);
+		
+		movieList = movieReader.readDataSet(file);
+		genreHash = new HashTableMap<String, List<MovieInterface>>(movieList.size());
+		ratingHash = new HashTableMap<String, List<MovieInterface>>(movieList.size());
 	
 	}
 
@@ -43,25 +55,37 @@ public class Backend implements BackendInterface {
 		ratings = new ArrayList<String>();
 		MovieDataReader movieReader = new MovieDataReader();
 		movieList = movieReader.readDataSet(r);
+		//System.out.println(movieList.get(2).getGenres());
 		genreHash = new HashTableMap<String, List<MovieInterface>>(movieList.size());
 		ratingHash = new HashTableMap<String, List<MovieInterface>>(movieList.size());
 
 	}
 
+	public List<MovieInterface> getMovieList() {
+		return movieList;
+	}
+	public List<String> getGenreList() {
+		return genres;
+	}
+	public List<String> getRatingList() {
+		return ratings;
+	}
 	/**
 	 * Method to add a genre that the user selected. It will output but not store
 	 * the genres passed to it.
 	 */
 	@Override
 	public void addGenre(String genre) {
-		genres.add(genre);
+		
 		for (int i = 0; i < movieList.size(); i++) {
 			for (int j = 0; j < movieList.get(i).getGenres().size(); j++) {
 				if (movieList.get(i).getGenres().get(j).equals(genre) && !genreHash.containsKey(genre)) {
+					genres.add(genre);
 					List<MovieInterface> newList = new ArrayList<MovieInterface>();
 					newList.add(movieList.get(i));
 					genreHash.put(genre, newList);
 				} else if (movieList.get(i).getGenres().get(j).equals(genre) && genreHash.containsKey(genre)) {
+					genres.add(genre);
 					genreHash.get(genre).add(movieList.get(i));
 					genreHash.increaseSize();
 				}
