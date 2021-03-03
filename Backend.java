@@ -1,7 +1,11 @@
 // --== CS400 File Header Information ==--
-// Author: Sean Erickson
-// Email: smerickson4@cs.wisc.edu
-// Notes: This is the backend implementation of the BackendInterface
+// Name: Sean Erickson
+// Email: smerickson4@wisc.edu
+// Team: blue
+// Role: back end developer
+// TA: hang
+// Lecturer: Gary
+// Notes to Grader: <optional extra notes>
 
 import java.util.ArrayList;
 import java.util.Arrays;
