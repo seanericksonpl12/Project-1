@@ -10,18 +10,25 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
+/**
+ * This class is the interactor with the user
+ * @author erhan wang
+ * @version 1.0
+ */
 public class FrontEnd {
-  public FrontEnd() {}
   private static Backend B;
-  
-  public FrontEnd(Backend B) {
-    this.B=B;
-  }
+  /**
+   * This method is the run method to set Backend
+   * 
+   * 
+   */
   public void run(Backend B) {
     this.B=B;
   }
-  
+  /**
+   * This is the main method and direct the users to base mode
+   * 
+   */
   public static void main(String[] args) {
     System.out.println("Please type in the path and press enter");
     Scanner sc = new Scanner (System.in);
@@ -42,7 +49,9 @@ public class FrontEnd {
     }
     base();
   }
-  
+  /**
+   * This method is the base mode of the project
+   */
   public static void base() {
     System.out.println("Welcome to the Base Mode.");
     System.out.println("Here are the top three movies in average rating.");
@@ -68,7 +77,9 @@ public class FrontEnd {
       }
     }
   }
-  
+  /**
+   * This method is the genre mode of the project
+   */
   public static void genre() {
     for(int i=1;i>0;i++) {
     
@@ -140,7 +151,9 @@ public class FrontEnd {
       }
     }
   }
-  
+  /**
+   * This method is the rating mode of the project
+   */
   public static void rating() {
     for(int j=1;j>0;j++) {
       for(int i=0;i<=10;i++) {
