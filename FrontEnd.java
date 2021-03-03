@@ -1,12 +1,10 @@
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.Reader;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class FrontEnd {
-  static BackendDummy B;
+  static Backend B;
   public static void main(String[] args) {
     System.out.println("Please type in the path and press enter");
     Scanner sc = new Scanner (System.in);
@@ -15,7 +13,7 @@ public class FrontEnd {
     path[0] = n;
     outer: for(int i=1;i>0;i++) {
       try {
-        B = new BackendDummy(path);
+        B = new Backend(path);
         break outer;
       }catch(FileNotFoundException e) {
         System.out.println("File not found, please type in the correct path.");
@@ -27,14 +25,6 @@ public class FrontEnd {
     }
     base();
   }
-  
-  /*
-   * 
-   * 
-   * 
-   */
-  
-  
   
   public static void base() {
     System.out.println("Welcome to the Base Mode.");
@@ -105,8 +95,24 @@ public class FrontEnd {
       System.out.println(B.getGenres());
     }
     //finish selection and show movies
+    List<MovieInterface> newList = B.getMovieList();
     if(n.equals("finish")) {
-      
+      for(int k=B.getMovieList().size()-1;k>=0;k--) {
+        outer3:for(int i=0;i<B.getGenres().size();i++) {
+          if(!B.getMovieList().get(k).getGenres().contains(B.getGenres().get(i))) {
+            newList.remove(newList.get(k));
+            break outer3;
+          }
+        }
+      }
+      for(int j=0;j<newList.size();j++) {
+        System.out.print(newList.get(j).getTitle());
+      }
+      Scanner cc = new Scanner (System.in);
+      String c = cc.next();
+      if(n.equals("x")) {
+        base();
+      }
     }
     //exit to base mode if type in "x"
     if(n.equals("x")) {
@@ -117,16 +123,69 @@ public class FrontEnd {
   }
   
   public static void rating() {
-    
+    System.out.println("Here are all the rating listed");
+    System.out.println("0,1,2,3,4,5,6,7,8,9,10");
+    System.out.println("Type in \"select\" or \"deselect\" to change the wanted rating");
+    System.out.println("Type in \"x\" to exit select, deselect mode or rating mode");
+    System.out.println("or type in \"current rating\" to see sellected rating");
+    System.out.println("type in \"finish\" to see sellected movie");
+    for(int i=0;i<=10;i++) {
+      B.addAvgRating(i+"");
+    }
 
-    System.out.println("You can choose movies from rating 0-10 (enter for all 0-10)");
-    System.out.println();
     Scanner sc = new Scanner (System.in);
-    String name = sc.next();
-    
-    
-    
-    if(name.equals("x")) {
+    String n = sc.next();
+    //select mode
+    outer1: if(n.equals("select")) {
+      for(int i=1;i>0;i++) {
+        System.out.println("Type in the number you want to select and press enter");
+        Scanner ge = new Scanner (System.in);
+        String g = ge.next();
+        if(g.equals("x")) {
+          break outer1;
+        }
+        B.addAvgRating(g);
+      }
+    }
+    //deselect mode
+    outer2: if(n.equals("deselect")) {
+      for(int i=1;i>0;i++) {
+        System.out.println("Type in the number you want to deselect and press enter");
+        Scanner ge = new Scanner (System.in);
+        String g = ge.next();
+        if(g.equals("x")) {
+          break outer2;
+        }
+        B.removeAvgRating(g);
+      }
+    }
+    //see current selected genre
+    if(n.equals("current rating")) {
+      System.out.println(B.getAvgRatings());
+    }
+    //finish selection and show movies
+    ArrayList<MovieInterface> newList = new ArrayList<MovieInterface>();
+    if(n.equals("finish")) {
+      for(int k=0;k<B.getMovieList().size();k++) {
+        outer3:for(int i=0;i<B.getAvgRatings().size();i++) {
+          if(Integer.parseInt(B.getAvgRatings().get(i)) < B.getMovieList().get(k).getAvgVote() && Integer.parseInt(B.getAvgRatings().get(i))+1 > B.getMovieList().get(k).getAvgVote() ) {
+            newList.add(B.getMovieList().get(k));
+            break outer3;
+          }
+          
+        }
+      }
+      for(int j=0;j<newList.size();j++) {
+        System.out.print(newList.get(j).getTitle());
+      }
+      Scanner cc = new Scanner (System.in);
+      String c = cc.next();
+      if(n.equals("x")) {
+        base();
+      }
+    }
+    //exit to base mode if type in "x"
+    if(n.equals("x")) {
       base();
     }
   }
