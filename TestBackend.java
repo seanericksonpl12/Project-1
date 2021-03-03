@@ -1,8 +1,11 @@
 // --== CS400 File Header Information ==--
-// Author: Sean Erickson
-// Email: smerickson4@cs.wisc.edu
-// Notes: This is the backend test class, testing the implmentation of the backend
-
+// Name: Sean Erickson
+// Email: smerickson4@wisc.edu
+// Team: blue
+// Role: back end developer
+// TA: hang
+// Lecturer: Gary
+// Notes to Grader: <optional extra notes>
 import java.io.StringReader;
 
 /**
