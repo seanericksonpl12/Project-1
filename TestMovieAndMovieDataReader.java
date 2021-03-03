@@ -1,3 +1,12 @@
+//--== CS400 File Header Information ==--
+//Name: Shupeng Tang
+//Email: stang72@wisc.edu
+//Team: HG Blue
+//Role: Data Wrangler
+//TA: Hang
+//Lecturer: Gary Dahl
+//Notes to Grader: <optional extra notes>
+
 import java.io.StringReader;
 import java.util.Collections;
 import java.util.List;
@@ -117,7 +126,7 @@ public class TestMovieAndMovieDataReader {
 								title2.equals(movieList.get(2).getTitle()) ||
 								title3.equals(movieList.get(2).getTitle()));
 		// true if the three movies have the right titles
-		System.out.println(movieList.get(2).getGenres().get(2));
+		
 		return equalOne;
 	}
 
@@ -153,7 +162,6 @@ public class TestMovieAndMovieDataReader {
 		return true;
 	}
 	
-	// TODO: Data Wrangler, add at least 2 more tests
     /**
      *This test reads in three movies, then check if their ratings are correct.
      *@return true if the test passed, false if it failed
