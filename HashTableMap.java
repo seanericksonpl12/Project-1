@@ -3,7 +3,7 @@ import java.util.NoSuchElementException;
 
 public class HashTableMap<KeyType, ValueType> implements MapADT<KeyType, ValueType> {
   private int capacity;
-  private int size = size();
+  private int size;
   private LinkedList<LinkedNode<KeyType, ValueType>>[] keyValuePairs;
   
   
@@ -32,12 +32,14 @@ public class HashTableMap<KeyType, ValueType> implements MapADT<KeyType, ValueTy
    if (keyValuePairs[Math.abs(key.hashCode()) % capacity] == null) {
      chain.add(pair);
      keyValuePairs[Math.abs(key.hashCode())% capacity] = chain;
+     this.size++;
      return true;
    }
    else {
      chain = keyValuePairs[Math.abs(key.hashCode())% capacity];
      chain.add(pair);
      keyValuePairs[Math.abs(key.hashCode())% capacity] = chain;
+     this.size++;
      return true;
      
    }
@@ -92,18 +94,12 @@ public class HashTableMap<KeyType, ValueType> implements MapADT<KeyType, ValueTy
     return searchedValue;
   }
 
+  public void increaseSize() {
+	  this.size++;
+  }
   @Override
   public int size() {
-    int counter = 0;
-    for (int i = 0; i < keyValuePairs.length; i++) {
-      if (keyValuePairs[i] != null) {
-      for (int j = 0; j < keyValuePairs[i].size(); j++) {
-        keyValuePairs[i].get(j);
-        counter++;
-      }
-    }
-    }
-    return counter;
+    return size();
   }
 
   @Override
@@ -130,6 +126,7 @@ public class HashTableMap<KeyType, ValueType> implements MapADT<KeyType, ValueTy
        if (keyValuePairs[i].get(j).getKey() == key) {
          toReturn = keyValuePairs[i].get(j).getValue();
          keyValuePairs[i].remove(j);
+         this.size--;
          break;
        } else {
          return null;
@@ -150,7 +147,7 @@ public class HashTableMap<KeyType, ValueType> implements MapADT<KeyType, ValueTy
       }
       }
     }
-    
+    this.size=0;
   }
 
   
