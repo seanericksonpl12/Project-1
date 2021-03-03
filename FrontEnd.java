@@ -13,7 +13,15 @@ import java.util.Scanner;
 
 public class FrontEnd {
   public FrontEnd() {}
-  static Backend B;
+  private static Backend B;
+  
+  public FrontEnd(Backend B) {
+    this.B=B;
+  }
+  public void run(Backend B) {
+    this.B=B;
+  }
+  
   public static void main(String[] args) {
     System.out.println("Please type in the path and press enter");
     Scanner sc = new Scanner (System.in);
