@@ -16,7 +16,7 @@ import java.util.Scanner;
  * @version 1.0
  */
 public class FrontEnd {
-  private static Backend B;
+  public static Backend B;
   /**
    * This method is the run method to set Backend
    * 
