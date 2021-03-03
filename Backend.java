@@ -1,23 +1,28 @@
+// --== CS400 File Header Information ==--
+// Author: Sean Erickson
+// Email: smerickson4@cs.wisc.edu
+// Notes: This is the backend implementation of the BackendInterface
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.zip.DataFormatException;
 import java.io.Reader;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 
-// --== CS400 File Header Information ==--
-// Author: CS400 Course Staff
-// Email: heimerl@cs.wisc.edu / dahl@cs.wisc.edu
-// Notes: This dummy class is part of the starter archive for Project One
-//        in spring 2021. You can extend it to work on your Project One Final
-//        App.
 
 public class Backend implements BackendInterface {
 
 	private HashTableMap<String, List<MovieInterface>> genreHash;
 	private HashTableMap<String, List<MovieInterface>> ratingHash;
 	private List<MovieInterface> movieList;
+	private List<MovieInterface> sortedMovies;
 	private List<String> genres;
 	private List<String> ratings;
 
@@ -28,19 +33,20 @@ public class Backend implements BackendInterface {
 	 * 
 	 * @param args list of command line arguments passed to front end
 	 */
-	public Backend(String[] args) throws FileNotFoundException{
+	public Backend(String[] args) throws DataFormatException, FileNotFoundException, IOException {
 		String arg = args[0];
-		
+
 		genres = new ArrayList<String>();
 		ratings = new ArrayList<String>();
-		
+		sortedMovies = new ArrayList<MovieInterface>();
+
 		MovieDataReader movieReader = new MovieDataReader();
 		FileReader file = new FileReader(arg);
-		
+
 		movieList = movieReader.readDataSet(file);
 		genreHash = new HashTableMap<String, List<MovieInterface>>(movieList.size());
 		ratingHash = new HashTableMap<String, List<MovieInterface>>(movieList.size());
-	
+		hash();
 	}
 
 	/**
@@ -49,48 +55,138 @@ public class Backend implements BackendInterface {
 	 * 
 	 * @param r A reader that contains the data in CSV format.
 	 */
-	public Backend(Reader r) {
+	public Backend(Reader r) throws IOException, DataFormatException {
 
 		genres = new ArrayList<String>();
 		ratings = new ArrayList<String>();
+		sortedMovies = new ArrayList<MovieInterface>();
 		MovieDataReader movieReader = new MovieDataReader();
 		movieList = movieReader.readDataSet(r);
-		//System.out.println(movieList.get(2).getGenres());
-		genreHash = new HashTableMap<String, List<MovieInterface>>(movieList.size());
-		ratingHash = new HashTableMap<String, List<MovieInterface>>(movieList.size());
+		// System.out.println(movieList.get(2).getGenres());
+		genreHash = new HashTableMap<String, List<MovieInterface>>(movieList.size() * 2);
+		ratingHash = new HashTableMap<String, List<MovieInterface>>(movieList.size() * 2);
+		hash();
 
 	}
 
 	public List<MovieInterface> getMovieList() {
 		return movieList;
 	}
-	public List<String> getGenreList() {
-		return genres;
+
+	/**
+	 * Private helper that puts all movies into a hash table
+	 */
+	private void hash() {
+		// Puts all movies into a hashtable from the movieList based off genre
+		// Loop through all movies
+		for (int i = 0; i < movieList.size(); i++) {
+			// make temporary movie object for each i
+			MovieInterface movie = movieList.get(i);
+			// Loop through genres for each movie
+			for (int j = 0; j < movie.getGenres().size(); j++) {
+				// if the table does not contain the key, then make new list and add list to
+				// table
+				if (!genreHash.containsKey(movie.getGenres().get(j))) {
+					List<MovieInterface> newList = new ArrayList<MovieInterface>();
+					newList.add(movie);
+					genreHash.put(movie.getGenres().get(j), newList);
+				}
+				// otherwise if the table does contain the key, add to list and increase size
+				else if (genreHash.containsKey(movie.getGenres().get(j))) {
+					genreHash.get(movie.getGenres().get(j)).add(movie);
+					genreHash.increaseSize();
+				}
+			}
+
+		}
+
+		// put all movies into hashtable from movielist based off rating
+
+		// Loop through genres for each movie
+		for (int i = 0; i < movieList.size(); i++) {
+			// Make new temporary movie object and store rating as rounded down double
+			MovieInterface movie = movieList.get(i);
+			double movieRating = Math.floor(movie.getAvgVote());
+			int temp = (int) movieRating;
+			// Change rating to rounded down string to store in table
+			String rating = String.valueOf(temp);
+			// if the table does not contain the key, then make new list and add list to
+			// table
+			if (!ratingHash.containsKey(rating)) {
+				List<MovieInterface> newList = new ArrayList<MovieInterface>();
+				newList.add(movie);
+				ratingHash.put(rating, newList);
+			}
+			// otherwise if the table does contain the key, add to list and increase size
+			else if (ratingHash.containsKey(rating)) {
+				ratingHash.get(rating).add(movie);
+				ratingHash.increaseSize();
+			}
+		}
+
 	}
-	public List<String> getRatingList() {
-		return ratings;
+
+	/*
+	 * Private helper that sorts all values that fit criteria in a list
+	 */
+	private void sort() {
+		// Initialize two booleans
+
+		boolean swtch1;
+		boolean swtch2;
+		// Checks hash tables against lists to count all movies that fit criteria
+		for (int i = 0; i < movieList.size(); i++) {
+			swtch1 = true;
+			swtch2 = true;
+			MovieInterface movie = movieList.get(i);
+			// System.out.println(movie.getGenres());
+			if (!genres.isEmpty()) {
+				for (int j = 0; j < genres.size(); j++) {
+					if (!movie.getGenres().contains(genres.get(j))) {
+						if (sortedMovies.contains(movie))
+							sortedMovies.remove(movie);
+						swtch1 = false;
+						break;
+					}
+				}
+			} else if (genres.isEmpty() && ratings.isEmpty())
+				swtch1 = false;
+			else
+				swtch1 = true;
+
+			if (!ratings.isEmpty()) {
+				// Check that the rating is within search criteria
+				double movieRating = Math.floor(movie.getAvgVote());
+				int temp = (int) movieRating;
+				// Change rating to rounded down string to store in table
+				String rating = String.valueOf(temp);
+				if (!ratings.contains(rating)) {
+					swtch2 = false;
+					if (sortedMovies.contains(movie))
+						sortedMovies.remove(movie);
+				}
+			} else
+				swtch2 = true;
+			// If rating and genres match, add to list
+
+			if (swtch1 && swtch2) {
+				sortedMovies.add(movie);
+			}
+		}
+
+		Set<MovieInterface> set = new HashSet<>(sortedMovies);
+		sortedMovies.clear();
+		sortedMovies.addAll(set);
 	}
+
 	/**
 	 * Method to add a genre that the user selected. It will output but not store
 	 * the genres passed to it.
 	 */
 	@Override
 	public void addGenre(String genre) {
-		
-		for (int i = 0; i < movieList.size(); i++) {
-			for (int j = 0; j < movieList.get(i).getGenres().size(); j++) {
-				if (movieList.get(i).getGenres().get(j).equals(genre) && !genreHash.containsKey(genre)) {
-					genres.add(genre);
-					List<MovieInterface> newList = new ArrayList<MovieInterface>();
-					newList.add(movieList.get(i));
-					genreHash.put(genre, newList);
-				} else if (movieList.get(i).getGenres().get(j).equals(genre) && genreHash.containsKey(genre)) {
-					genres.add(genre);
-					genreHash.get(genre).add(movieList.get(i));
-					genreHash.increaseSize();
-				}
-			}
-		}
+		genres.add(genre);
+		sort();
 	}
 
 	/**
@@ -99,31 +195,14 @@ public class Backend implements BackendInterface {
 	 */
 	@Override
 	public void addAvgRating(String rating) {
-		// TODO: Fixme! Add dummy implementation similar to addGenre method.
-		int i = 0;
-		while (i <= 10) {
-			String str = String.valueOf(i);
-			if (rating.equals(str)) {
-				double x = i;
-				double ceil = x + .999;
-				ratings.add(rating);
-				for (int j = 0; j < movieList.size(); j++) {
-					if (movieList.get(j).getAvgVote() <= ceil && movieList.get(j).getAvgVote() >= x
-							&& !ratingHash.containsKey(rating)) {
-						List<MovieInterface> newList = new ArrayList<MovieInterface>();
-						newList.add(movieList.get(j));
-						ratingHash.put(rating, newList);
-						return;
-					} else if (movieList.get(j).getAvgVote() <= ceil && movieList.get(j).getAvgVote() >= x
-							&& ratingHash.containsKey(rating)) {
-						ratingHash.get(rating).add(movieList.get(j));
-						ratingHash.increaseSize();
-					}
-				}
-			}
-			i++;
-		}
-		System.out.println("Invalid Rating");
+		// Make sure rating is a string between 0-10
+		if (rating.equals("0") || rating.equals("1") || rating.equals("2") || rating.equals("3") || rating.equals("4")
+				|| rating.equals("5") || rating.equals("6") || rating.equals("7") || rating.equals("8")
+				|| rating.equals("9") || rating.equals("10")) {
+			ratings.add(rating);
+			sort();
+		} else
+			System.out.println("invalid rating");
 	}
 
 	/**
@@ -132,9 +211,8 @@ public class Backend implements BackendInterface {
 	 */
 	@Override
 	public void removeGenre(String genre) {
-		// TODO: Fixme! Add dummy implementation similar to addGenre method.
 		genres.remove(genre);
-		genreHash.remove(genre);
+		sort();
 	}
 
 	/**
@@ -145,12 +223,11 @@ public class Backend implements BackendInterface {
 	public void removeAvgRating(String rating) {
 		// TODO: Fixme! Add dummy implementation similar to addGenre method.
 		ratings.remove(rating);
-		ratingHash.remove(rating);
+		sort();
 	}
 
 	/**
-	 * Return the genres added to this backend object. The dummy implementation
-	 * always returns the same list of genres for testing.
+	 * Return the genres added to this backend object.
 	 */
 	@Override
 	public List<String> getGenres() {
@@ -158,62 +235,33 @@ public class Backend implements BackendInterface {
 	}
 
 	/**
-	 * Return the ratings added to this backend object. The dummy implementation
-	 * always returns the same list of ratings for testing.
+	 * Return the ratings added to this backend object.
 	 */
 	@Override
 	public List<String> getAvgRatings() {
-		// TODO: Fixme! Add dummy implementation similar to getGenres.
+
 		return ratings;
 	}
 
 	/**
-	 * Returns the number of movies. This is a constant for the dummy
-	 * implementation.
+	 * Returns the number of movies.
 	 */
 	@Override
 	public int getNumberOfMovies() {
-		int sum = 0;
-		boolean swtch1 = false;
-		boolean swtch2 = false;
-		// Cross reference hash tables to check that there are no duplicates
-		for (int i = 0; i < movieList.size(); i++) {
-			swtch1 = false;
-			swtch2 = false;
-
-			for (int j = 0; j < genres.size(); j++) {
-				for (int k = 0; k < movieList.get(i).getGenres().size(); k++) {
-					if (movieList.get(i).getGenres().get(k).equals(genres.get(j)))
-						swtch1 = true;
-				}
-			}
-
-			// check that it has the correct rating
-			for (int j = 0; j < ratings.size(); j++) {
-				int x = Integer.parseInt(ratings.get(j));
-				double temp = x;
-				double ceil = temp + .999;
-
-				if (movieList.get(i).getAvgVote() >= temp && movieList.get(i).getAvgVote() <= ceil)
-					swtch2 = true;
-			}
-
-			if (swtch1 && swtch2)
-				sum++;
-
-		}
-		return sum;
+		return sortedMovies.size();
 	}
 
 	/**
-	 * Returns all genres in the dataset. Will return a list of 5 genres for the
-	 * dummy implementation.
+	 * Returns all genres in the dataset.
 	 */
 	@Override
 	public List<String> getAllGenres() {
 		List<String> rtn = new ArrayList<String>();
+		// loop through all movies
 		for (int i = 0; i < movieList.size(); i++) {
+			// loop through all genres of the movie at i
 			for (int j = 0; j < movieList.get(i).getGenres().size(); j++) {
+				// if list doesn't contain the genre already, remove it
 				if (!rtn.contains(movieList.get(i).getGenres().get(j))) {
 					rtn.add(movieList.get(i).getGenres().get(j));
 				}
@@ -224,39 +272,41 @@ public class Backend implements BackendInterface {
 	}
 
 	/**
-	 * Returns the movies that match the ratings and genres. The dummy
-	 * implementation will return the same list of three movies.
+	 * Returns the movies that match the ratings and genres.
 	 */
 	@Override
 	public List<MovieInterface> getThreeMovies(int startingIndex) {
 		ArrayList<MovieInterface> movies = new ArrayList<MovieInterface>();
-		int count = startingIndex;
-		int size = 0;
-		while (size < 3 && count >= 0) {
-			String rating = String.valueOf(count);
-			if (ratingHash.containsKey(rating) && ratingHash.get(rating).size() > 1) {
+		if (sortedMovies.isEmpty())
+			return movies;
+		try {
+			String str = String.valueOf(startingIndex);
+			while (!ratingHash.containsKey(str) && startingIndex != 0) {
+				startingIndex--;
+				str = String.valueOf(startingIndex);
+			}
+			for (int j = startingIndex; j > startingIndex - 3; j--) {
 
-				int j = 0;
-				while (j < ratingHash.get(rating).size() && size < 3) {
-					if (!Collections.disjoint(ratingHash.get(rating).get(j).getGenres(), genres)) {
-						movies.add(ratingHash.get(rating).get(j));
-						j++;
-						size++;
-						count--;
-					} else
-						j++;
-
+				List<MovieInterface> temp = ratingHash.get(str);
+				if (temp.isEmpty())
+					j--;
+				else if (temp.size() == 1)
+					movies.add(temp.get(0));
+				else if (temp.size() > 1) {
+					for (int i = 0; i < temp.size(); i++) {
+						movies.add(temp.get(i));
+						if (j >= 0)
+							break;
+						j--;
+					}
 				}
-			} else if (ratingHash.containsKey(rating) && ratingHash.get(rating).size() == 1) {
-				if (!Collections.disjoint(ratingHash.get(rating).get(0).getGenres(), genres)) {
-					movies.add(ratingHash.get(rating).get(0));
-					count--;
-					size++;
-				}
-			} else
-				count--;
+			}
+			Collections.sort(movies);
+			Collections.reverse(movies);
+			return movies;
+		} catch (IndexOutOfBoundsException e) {
+			return movies;
 		}
-
-		return movies;
 	}
+
 }
